@@ -10,6 +10,7 @@
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
     min-height: 100vh;
+    overflow-x: hidden;
     color: #4a2b36;
     background:
       radial-gradient(120% 60% at 100% 0%, #fbe3ee 0%, rgba(251,227,238,0) 55%),
@@ -27,6 +28,9 @@
     border-radius: 26px;
     box-shadow: 0 22px 64px rgba(181, 90, 137, 0.22);
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 40px);
   }
   .header {
     background: linear-gradient(135deg, #efb0c9 0%, #d77cab 55%, #c76ba0 100%);
@@ -34,6 +38,7 @@
     padding: 26px 24px 22px;
     text-align: center;
     position: relative;
+    flex: 0 0 auto;
   }
   .logo-circle {
     width: 64px; height: 64px;
@@ -47,7 +52,7 @@
   .header h1 { font-size: 22px; letter-spacing: 0.2px; font-weight: 800; line-height: 1.25; }
   .header p { font-size: 14px; opacity: 0.94; margin-top: 6px; }
 
-  .progress { padding: 22px 24px 0; }
+  .progress { padding: 22px 24px 0; flex: 0 0 auto; }
   .bar { height: 6px; background: #f3dbe7; border-radius: 99px; overflow: hidden; }
   .bar span { display: block; height: 100%; width: 25%; background: linear-gradient(90deg,#e18ab0,#c76ba0); border-radius: 99px; transition: width 0.35s ease; }
   .dots { display: flex; justify-content: space-between; margin-top: 10px; }
@@ -56,8 +61,8 @@
   .dot.active { color: #a03c6e; }
   .dot.active i { background: #c76ba0; transform: scale(1.25); }
 
-  form { padding: 10px 24px 30px; }
-  .steps { min-height: 340px; }
+  form { padding: 10px 24px 0; display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; }
+  .steps { flex: 1 1 auto; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 6px 0 12px; }
   .step { display: none; }
   .step.active { display: block; animation: fadeSlide 0.32s ease; }
   @keyframes fadeSlide {
@@ -122,7 +127,8 @@
 
   .extras { display: grid; grid-template-columns: repeat(2,1fr); gap: 9px; }
   .extra { display: flex; align-items: center; gap: 8px; padding: 11px 11px; font-size: 13px; line-height: 1.2; color: #6b3a50;
-    border: 1.5px solid #efd3e0; border-radius: 12px; background: #fdf6f9; cursor: pointer; transition: all 0.15s; user-select: none; }
+    border: 1.5px solid #efd3e0; border-radius: 12px; background: #fdf6f9; cursor: pointer; transition: all 0.15s; user-select: none;
+    min-width: 0; overflow-wrap: anywhere; }
   .extra:active { transform: scale(0.98); }
   .extra:has(input:checked) { background: #fbeaf2; border-color: #d77cab; color: #a03c6e; font-weight: 700; }
   .extra input { width: 19px; height: 19px; accent-color: #d77cab; flex-shrink: 0; }
@@ -131,7 +137,7 @@
   .err { display: none; background: #fde4ea; color: #b03a50; border: 1px solid #f6c4d0; border-radius: 12px; padding: 11px 14px; font-size: 13.5px; line-height: 1.4; margin-bottom: 6px; }
   .err.show { display: block; animation: fadeSlide 0.25s ease; }
 
-  .nav { display: flex; gap: 12px; margin-top: 26px; }
+  .nav { display: flex; gap: 12px; padding: 14px 0 22px; flex: 0 0 auto; }
   .btnghost { flex: 0 0 auto; min-height: 52px; padding: 0 22px; font-size: 15px; font-weight: 700; color: #a03c6e;
     background: #fff; border: 1.5px solid #d77cab; border-radius: 14px; cursor: pointer; }
   .btnmain { flex: 1; min-height: 52px; font-size: 16px; font-weight: 800; color: #fff;
@@ -148,6 +154,7 @@
     form { padding-left: 18px; padding-right: 18px; }
     .svc { min-height: 70px; }
     .svc .em { font-size: 22px; }
+    .extras { grid-template-columns: 1fr; }
   }
 </style>
 </head>
