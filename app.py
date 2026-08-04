@@ -18,15 +18,29 @@ BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
 ADMIN_CHAT_ID = os.getenv("ADMIN_CHAT_ID", "").strip()
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin123").strip()
 
-MASSAGE_TYPES = [
-    "Классический массаж",
-    "Расслабляющий массаж",
-    "Спортивный массаж",
-    "Лечебный массаж",
-    "Антицеллюлитный массаж",
-    "Стоун-терапия",
-    "Другое",
-]
+MASSAGE_GROUPS = {
+    "Основные услуги": [
+        "Массаж головы",
+        "Массаж спины",
+        "Массаж ног",
+        "Массаж стоп",
+        "Массаж груди",
+        "Массаж плеч",
+        "Массаж рук",
+        "Комплексный массаж всего тела",
+    ],
+    "Дополнительные услуги": [
+        "Интимный массаж",
+        "Эротический массаж",
+        "Массаж при свечах",
+        "Массаж при согласовании (особый)",
+    ],
+    "Прочее": [
+        "Другое",
+    ],
+}
+
+MASSAGE_TYPES = [s for services in MASSAGE_GROUPS.values() for s in services]
 
 TIME_SLOTS = [
     "09:00", "10:00", "11:00", "12:00", "13:00", "14:00",
@@ -153,7 +167,7 @@ def notify_about_booking(name, date_str, time_str, service):
 def index():
     return render_template(
         "index.html",
-        massage_types=MASSAGE_TYPES,
+        massage_groups=MASSAGE_GROUPS,
         time_slots=TIME_SLOTS,
         today=date.today().isoformat(),
     )

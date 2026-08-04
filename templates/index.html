@@ -141,8 +141,12 @@
       <label for="service">Тип массажа</label>
       <select id="service" name="service" required>
         <option value="" disabled selected>Выберите тип</option>
-        {% for t in massage_types %}
-          <option value="{{ t }}">{{ t }}</option>
+        {% for group, services in massage_groups.items() %}
+          <optgroup label="{{ group }}">
+            {% for s in services %}
+              <option value="{{ s }}">{{ s }}</option>
+            {% endfor %}
+          </optgroup>
         {% endfor %}
       </select>
 
