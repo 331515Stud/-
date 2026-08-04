@@ -4,7 +4,7 @@ import re
 import sqlite3
 import threading
 import time
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
 from dotenv import load_dotenv
 from flask import Flask, flash, redirect, render_template, request, session, url_for
@@ -44,6 +44,33 @@ EXTRA_SERVICES = [
 ]
 
 PLAYLIST_EXTRA = "Свой плейлист (музыка на ваш вкус)"
+
+STUDIO_NAME = "Студия массажа Никиты"
+
+DURATIONS = ["30 минут", "60 минут", "90 минут"]
+
+MASTER_ICON = "👨‍⚕️"
+
+SERVICE_ICONS = {
+    "Массаж головы": "💆‍♀️",
+    "Массаж спины": "🙆‍♀️",
+    "Массаж ног": "🦵",
+    "Массаж стоп": "🦶",
+    "Массаж груди": "💗",
+    "Массаж плеч": "🤲",
+    "Массаж рук": "💪",
+    "Комплексный массаж всего тела": "✨",
+    "Интимный массаж": "💕",
+    "Массаж при свечах": "🕯️",
+    "Пенная ванна": "🛁",
+    "Чайная церемония": "🍵",
+    "Ароматерапия (масла и свечи)": "🌸",
+    "Тёплые массажные масла": "🧴",
+    "Свой плейлист (музыка на ваш вкус)": "🎵",
+    "Горячие полотенца": "🧖",
+    "Увлажняющая маска для лица": "🎀",
+    "Травяной чай с угощениями": "🍃",
+}
 
 MASTERS = ["Красавцев Никита"]
 
@@ -85,6 +112,7 @@ def init_db():
                 phone TEXT NOT NULL DEFAULT '',
                 date TEXT NOT NULL,
                 time TEXT NOT NULL,
+                duration TEXT NOT NULL DEFAULT '',
                 master TEXT NOT NULL DEFAULT '',
                 service TEXT NOT NULL,
                 extras TEXT NOT NULL DEFAULT '',
@@ -109,10 +137,13 @@ def init_db():
             "phone": "TEXT NOT NULL DEFAULT ''",
             "playlist": "TEXT NOT NULL DEFAULT ''",
             "master": "TEXT NOT NULL DEFAULT ''",
+            "duration": "TEXT NOT NULL DEFAULT ''",
             "status": "TEXT NOT NULL DEFAULT 'new'",
             "tgm_chat_id": "TEXT",
             "master_chat_id": "TEXT",
             "master_msg_id": "INTEGER",
+            "remind_1day": "INTEGER NOT NULL DEFAULT 0",
+            "remind_2h": "INTEGER NOT NULL DEFAULT 0",
         }.items():
             ensure_column(conn, "bookings", column, decl)
 
@@ -169,6 +200,8 @@ def build_booking_text(row):
         f"⏰ Время: <b>{row['time']}</b>",
         f"💆‍♀️ Массаж: <b>{html.escape(row['service'])}</b>",
     ]
+    if row["duration"]:
+        lines.append(f"⏳ Длительность: <b>{html.escape(row['duration'])}</b>")
     if row["master"]:
         info = MASTER_INFO.get(row["master"], "")
         master_line = f"👨‍⚕️ Мастер: <b>{html.escape(row['master'])}</b>"
@@ -385,6 +418,54 @@ def handle_callback(cp):
     apply_confirmation(int(bid_str), "confirmed" if action == "confirm" else "cancelled")
 
 
+def check_reminders():
+    """Раз в цикле проверяет подтверждённые записи и шлёт напоминания
+    клиенту и мастеру за день (в 18:00) и за 2 часа до сеанса."""
+    now = datetime.now()
+    today = now.date()
+    with get_db() as conn:
+        rows = conn.execute("SELECT * FROM bookings WHERE status = 'confirmed'").fetchall()
+    for row in rows:
+        try:
+            bdt = datetime.strptime(f"{row['date']} {row['time']}", "%Y-%m-%d %H:%M")
+        except ValueError:
+            continue
+        bdate = bdt.date()
+
+        # напоминание за день, в 18:00
+        if bdate == today + timedelta(days=1) and now.hour >= 18 and not row["remind_1day"]:
+            _send_reminder(row, "Завтра")
+            with get_db() as conn:
+                conn.execute("UPDATE bookings SET remind_1day = 1 WHERE id = ?", (row["id"],))
+
+        # напоминание за 2 часа
+        delta = (bdt - now).total_seconds()
+        if 0 <= delta <= 7200 and not row["remind_2h"]:
+            _send_reminder(row, "Через 2 часа")
+            with get_db() as conn:
+                conn.execute("UPDATE bookings SET remind_2h = 1 WHERE id = ?", (row["id"],))
+
+
+def _send_reminder(row, when_text):
+    icon = SERVICE_ICONS.get(row["service"], "💆‍♀️")
+    when_val = when_text.lower()
+    if row["tgm_chat_id"]:
+        tg_send(
+            row["tgm_chat_id"],
+            f"⏰ <b>{when_text}</b> в {row['time']} у вас массаж "
+            f"{icon}<b>{html.escape(row['service'])}</b> "
+            f"у {MASTER_ICON} {html.escape(row['master'])}.\n\nЖдём вас! 💕",
+        )
+    chat_id = admin_chat_id()
+    if chat_id:
+        tg_send(
+            chat_id,
+            f"⏰ Напоминание: {when_val} в {row['time']} — "
+            f"{html.escape(row['name'])}, {icon}{html.escape(row['service'])} "
+            f"(тел. {html.escape(row['phone'])})",
+        )
+
+
 def tg_listener():
     """Фоновый поток: обрабатывает команды клиентов и нажатия кнопок мастера."""
     offset = 0
@@ -404,6 +485,10 @@ def tg_listener():
                         handle_message(update["message"])
                 except Exception:
                     pass
+        try:
+            check_reminders()
+        except Exception:
+            pass
         time.sleep(1)
 
 
@@ -413,11 +498,15 @@ def tg_listener():
 def index():
     return render_template(
         "index.html",
+        studio_name=STUDIO_NAME,
         main_services=MAIN_SERVICES,
         extra_services=EXTRA_SERVICES,
         playlist_extra=PLAYLIST_EXTRA,
         masters=MASTERS,
         master_info=MASTER_INFO,
+        master_icon=MASTER_ICON,
+        service_icons=SERVICE_ICONS,
+        durations=DURATIONS,
         time_slots=TIME_SLOTS,
         today=date.today().isoformat(),
     )
@@ -431,6 +520,7 @@ def book():
     time_str = request.form.get("time", "").strip()
     service = request.form.get("service", "").strip()
     master = request.form.get("master", "").strip()
+    duration = request.form.get("duration", "").strip()
     extras = request.form.getlist("extras")
     playlist = request.form.get("playlist", "").strip()
     notes = request.form.get("notes", "").strip()
@@ -444,6 +534,8 @@ def book():
         errors.append("Пожалуйста, выберите основной массаж.")
     if master not in MASTERS:
         errors.append("Пожалуйста, выберите мастера.")
+    if duration not in DURATIONS:
+        errors.append("Пожалуйста, выберите продолжительность сеанса.")
     for extra in extras:
         if extra not in EXTRA_SERVICES:
             errors.append("Некорректная дополнительная услуга.")
@@ -483,17 +575,18 @@ def book():
     extras_csv = ", ".join(extras)
     with get_db() as conn:
         cur = conn.execute(
-            "INSERT INTO bookings (name, phone, date, time, master, service, extras, playlist, notes, created_at) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            (name, phone, date_str, time_str, master, service, extras_csv, playlist, notes, created_at),
+            "INSERT INTO bookings (name, phone, date, time, duration, master, service, extras, playlist, notes, created_at) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (name, phone, date_str, time_str, duration, master, service,
+             extras_csv, playlist, notes, created_at),
         )
         booking_id = cur.lastrowid
 
     notify_booking(booking_id)
     return redirect(
         url_for("success", booking_id=booking_id, name=name, phone=phone, date=date_str,
-                time=time_str, master=master, service=service, extras=extras_csv,
-                playlist=playlist, notes=notes)
+                time=time_str, duration=duration, master=master, service=service,
+                extras=extras_csv, playlist=playlist, notes=notes)
     )
 
 
@@ -506,6 +599,7 @@ def success():
     time_str = request.args.get("time", "")
     service = request.args.get("service", "")
     master = request.args.get("master", "")
+    duration = request.args.get("duration", "")
     extras = request.args.get("extras", "")
     playlist = request.args.get("playlist", "")
     notes = request.args.get("notes", "")
@@ -517,7 +611,10 @@ def success():
         "success.html",
         booking_id=booking_id,
         bot_username=bot_username(),
-        name=name, phone=phone, date=pretty, time=time_str, master=master,
+        studio_name=STUDIO_NAME,
+        service_icon=SERVICE_ICONS.get(service, "💆‍♀️"),
+        master_icon=MASTER_ICON,
+        name=name, phone=phone, date=pretty, time=time_str, duration=duration, master=master,
         service=service, extras=extras, playlist=playlist, notes=notes,
     )
 
@@ -555,6 +652,7 @@ def admin():
             "date_iso": row["date"],
             "weekday": WEEKDAYS[datetime.strptime(row["date"], "%Y-%m-%d").weekday()],
             "time": row["time"],
+            "duration": row["duration"],
             "master": row["master"],
             "service": row["service"],
             "extras": row["extras"],

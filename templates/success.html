@@ -105,12 +105,13 @@
       </svg>
     </div>
     <h1>Вы записаны!</h1>
-    <div class="sub">Спасибо, {{ name }}! Мы ждём вас 💕</div>
+    <div class="sub">{{ studio_name }} — спасибо, {{ name }}! Мы ждём вас 💕</div>
     <div class="details">
-      <div class="row"><span class="label">Мастер</span><span class="value">{{ master }}</span></div>
+      <div class="row"><span class="label">Мастер</span><span class="value">{{ master_icon }} {{ master }}</span></div>
       <div class="row"><span class="label">Дата</span><span class="value">{{ date }}</span></div>
       <div class="row"><span class="label">Время</span><span class="value">{{ time }}</span></div>
-      <div class="row"><span class="label">Массаж</span><span class="value">{{ service }}</span></div>
+      <div class="row"><span class="label">Длительность</span><span class="value">{{ duration }}</span></div>
+      <div class="row"><span class="label">Массаж</span><span class="value">{{ service_icon }} {{ service }}</span></div>
       {% if extras %}
         <div class="row"><span class="label">Дополнительно</span><span class="value">{{ extras }}</span></div>
       {% endif %}

@@ -48,7 +48,7 @@
   .empty { background: #fff; border-radius: 14px; padding: 40px; text-align: center; color: #a07a8a; box-shadow: 0 6px 24px rgba(214,120,165,.15); }
   .count { font-size: 14px; color: #8a5a6e; margin-bottom: 12px; }
   .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 14px; box-shadow: 0 6px 24px rgba(214,120,165,.15); }
-  table { width: 100%; min-width: 760px; border-collapse: collapse; background: #fff; }
+  table { width: 100%; min-width: 860px; border-collapse: collapse; background: #fff; }
 </style>
 </head>
 <body>
@@ -72,12 +72,13 @@
       <div class="count">Найдено: {{ bookings|length }}</div>
       <div class="table-scroll">
       <table>
-        <tr><th>Имя</th><th>Дата</th><th>Время</th><th>Мастер</th><th>Массаж</th><th>Доп.</th><th>Пожелания</th><th>Статус</th><th></th></tr>
+        <tr><th>Имя</th><th>Дата</th><th>Время</th><th>Длит.</th><th>Мастер</th><th>Массаж</th><th>Доп.</th><th>Пожелания</th><th>Статус</th><th></th></tr>
         {% for b in bookings %}
           <tr>
             <td><b>{{ b.name }}</b><br><span class="muted">📱 {{ b.phone }}</span></td>
             <td>{{ b.date }} <span class="badge">{{ b.weekday }}</span></td>
             <td>{{ b.time }}</td>
+            <td>{{ b.duration }}</td>
             <td>{{ b.master }}</td>
             <td>
               {{ b.service }}
