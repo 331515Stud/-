@@ -281,7 +281,7 @@ def handle_message(msg):
     if not chat_id:
         return
 
-    if text.startswith("/start-master"):
+    if text.split()[0] in ("/master", "/start-master"):
         set_setting("admin_chat_id", str(chat_id))
         tg_send(chat_id, "Вы зарегистрированы как мастер ✅\nСюда будут приходить записи на массаж и кнопки «Подтвердить / Отменить».")
         return
@@ -577,5 +577,9 @@ def admin_confirm(booking_id):
 if __name__ == "__main__":
     init_db()
     if BOT_TOKEN:
+        tg_api("setMyCommands", {"commands": [
+            {"command": "start", "description": "Клиент: получать подтверждение записи"},
+            {"command": "master", "description": "Мастер: кабинет подтверждения записей"},
+        ]})
         threading.Thread(target=tg_listener, daemon=True).start()
     app.run(host="0.0.0.0", port=int(os.getenv("PORT", 5000)), debug=False)
