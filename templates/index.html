@@ -58,6 +58,8 @@
   }
   input[type="text"], input[type="tel"], input[type="date"], select, textarea {
     width: 100%;
+    max-width: 100%;
+    min-width: 0;
     font-size: 16px;
     padding: 14px 15px;
     border: 1.5px solid #efd3e0;
@@ -67,6 +69,11 @@
     outline: none;
     transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
     font-family: inherit;
+  }
+  input[type="date"] {
+    -webkit-appearance: none;
+    appearance: none;
+    display: block;
   }
   input:focus, select:focus, textarea:focus {
     border-color: #d77cab;
