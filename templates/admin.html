@@ -60,13 +60,15 @@
     {% if bookings %}
       <div class="count">Найдено: {{ bookings|length }}</div>
       <table>
-        <tr><th>Имя</th><th>Дата</th><th>Время</th><th>Тип</th><th></th></tr>
+        <tr><th>Имя</th><th>Дата</th><th>Время</th><th>Массаж</th><th>Доп.</th><th>Пожелания</th><th></th></tr>
         {% for b in bookings %}
           <tr>
             <td><b>{{ b.name }}</b></td>
             <td>{{ b.date }} <span class="badge">{{ b.weekday }}</span></td>
             <td>{{ b.time }}</td>
             <td>{{ b.service }}</td>
+            <td>{{ b.extras }}</td>
+            <td>{{ b.notes }}</td>
             <td>
               <form method="POST" action="/admin/delete/{{ b.id }}" onsubmit="return confirm('Удалить запись?');">
                 <button class="del" type="submit">удалить</button>

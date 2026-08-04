@@ -18,29 +18,30 @@ BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
 ADMIN_CHAT_ID = os.getenv("ADMIN_CHAT_ID", "").strip()
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin123").strip()
 
-MASSAGE_GROUPS = {
-    "Основные услуги": [
-        "Массаж головы",
-        "Массаж спины",
-        "Массаж ног",
-        "Массаж стоп",
-        "Массаж груди",
-        "Массаж плеч",
-        "Массаж рук",
-        "Комплексный массаж всего тела",
-    ],
-    "Дополнительные услуги": [
-        "Интимный массаж",
-        "Эротический массаж",
-        "Массаж при свечах",
-        "Массаж при согласовании (особый)",
-    ],
-    "Прочее": [
-        "Другое",
-    ],
-}
+MAIN_SERVICES = [
+    "Массаж головы",
+    "Массаж спины",
+    "Массаж ног",
+    "Массаж стоп",
+    "Массаж груди",
+    "Массаж плеч",
+    "Массаж рук",
+    "Комплексный массаж всего тела",
+]
 
-MASSAGE_TYPES = [s for services in MASSAGE_GROUPS.values() for s in services]
+EXTRA_SERVICES = [
+    "Интимный массаж",
+    "Эротический массаж",
+    "Массаж при свечах",
+    "Чайная церемония",
+    "Спа-программа",
+    "Стоун-терапия",
+    "Ароматерапия",
+    "Медовый массаж",
+    "Обёртывание тела",
+    "Пилинг тела",
+    "Тандем-массаж (вдвоём)",
+]
 
 TIME_SLOTS = [
     "09:00", "10:00", "11:00", "12:00", "13:00", "14:00",
@@ -70,6 +71,8 @@ def init_db():
                 date TEXT NOT NULL,
                 time TEXT NOT NULL,
                 service TEXT NOT NULL,
+                extras TEXT NOT NULL DEFAULT '',
+                notes TEXT NOT NULL DEFAULT '',
                 created_at TEXT NOT NULL
             )"""
         )
@@ -79,6 +82,14 @@ def init_db():
                 value TEXT
             )"""
         )
+        ensure_column(conn, "bookings", "extras", "TEXT NOT NULL DEFAULT ''")
+        ensure_column(conn, "bookings", "notes", "TEXT NOT NULL DEFAULT ''")
+
+
+def ensure_column(conn, table, column, decl):
+    cols = [row["name"] for row in conn.execute(f"PRAGMA table_info({table})").fetchall()]
+    if column not in cols:
+        conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {decl}")
 
 
 def get_setting(key):
@@ -146,7 +157,7 @@ def tg_listener():
         time.sleep(1)
 
 
-def notify_about_booking(name, date_str, time_str, service):
+def notify_about_booking(name, date_str, time_str, service, extras=None, notes=""):
     date_obj = datetime.strptime(date_str, "%Y-%m-%d")
     pretty_date = f"{date_obj.day:02d}.{date_obj.month:02d}.{date_obj.year} ({WEEKDAYS[date_obj.weekday()]})"
     text = (
@@ -154,8 +165,12 @@ def notify_about_booking(name, date_str, time_str, service):
         f"👤 Имя: <b>{html.escape(name)}</b>\n"
         f"📆 Дата: <b>{pretty_date}</b>\n"
         f"⏰ Время: <b>{time_str}</b>\n"
-        f"💆‍♀️ Тип: <b>{html.escape(service)}</b>"
+        f"💆‍♀️ Массаж: <b>{html.escape(service)}</b>"
     )
+    if extras:
+        text += f"\n✨ Дополнительно: <b>{html.escape(', '.join(extras))}</b>"
+    if notes:
+        text += f"\n💬 Пожелания: <b>{html.escape(notes)}</b>"
     chat_id = admin_chat_id()
     if chat_id:
         tg_send(chat_id, text)
@@ -167,7 +182,8 @@ def notify_about_booking(name, date_str, time_str, service):
 def index():
     return render_template(
         "index.html",
-        massage_groups=MASSAGE_GROUPS,
+        main_services=MAIN_SERVICES,
+        extra_services=EXTRA_SERVICES,
         time_slots=TIME_SLOTS,
         today=date.today().isoformat(),
     )
@@ -179,14 +195,21 @@ def book():
     date_str = request.form.get("date", "").strip()
     time_str = request.form.get("time", "").strip()
     service = request.form.get("service", "").strip()
+    extras = request.form.getlist("extras")
+    notes = request.form.get("notes", "").strip()
 
     errors = []
     if not name or len(name) > 100:
         errors.append("Пожалуйста, укажите ваше имя.")
-    if service not in MASSAGE_TYPES:
-        errors.append("Пожалуйста, выберите тип массажа.")
-    if time_str not in TIME_SLOTS:
-        errors.append("Пожалуйста, выберите время.")
+    if service not in MAIN_SERVICES:
+        errors.append("Пожалуйста, выберите основной массаж.")
+    for extra in extras:
+        if extra not in EXTRA_SERVICES:
+            errors.append("Некорректная дополнительная услуга.")
+    if len(extras) > len(EXTRA_SERVICES):
+        errors.append("Слишком много дополнительных услуг.")
+    if len(notes) > 500:
+        errors.append("Пожелания слишком длинные (максимум 500 символов).")
     if date_str:
         try:
             selected = datetime.strptime(date_str, "%Y-%m-%d").date()
@@ -212,14 +235,19 @@ def book():
         return redirect(url_for("index"))
 
     created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    extras_csv = ", ".join(extras)
     with get_db() as conn:
         conn.execute(
-            "INSERT INTO bookings (name, date, time, service, created_at) VALUES (?, ?, ?, ?, ?)",
-            (name, date_str, time_str, service, created_at),
+            "INSERT INTO bookings (name, date, time, service, extras, notes, created_at) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?)",
+            (name, date_str, time_str, service, extras_csv, notes, created_at),
         )
 
-    notify_about_booking(name, date_str, time_str, service)
-    return redirect(url_for("success", name=name, date=date_str, time=time_str, service=service))
+    notify_about_booking(name, date_str, time_str, service, extras, notes)
+    return redirect(
+        url_for("success", name=name, date=date_str, time=time_str, service=service,
+                extras=extras_csv, notes=notes)
+    )
 
 
 @app.route("/success")
@@ -228,12 +256,18 @@ def success():
     date_str = request.args.get("date", "")
     time_str = request.args.get("time", "")
     service = request.args.get("service", "")
+    extras = request.args.get("extras", "")
+    notes = request.args.get("notes", "")
     if date_str:
         date_obj = datetime.strptime(date_str, "%Y-%m-%d")
         pretty_date = f"{date_obj.day:02d}.{date_obj.month:02d}.{date_obj.year}"
     else:
         pretty_date = ""
-    return render_template("success.html", name=name, date=pretty_date, time=time_str, service=service)
+    return render_template(
+        "success.html",
+        name=name, date=pretty_date, time=time_str,
+        service=service, extras=extras, notes=notes,
+    )
 
 
 @app.route("/admin", methods=["GET", "POST"])
@@ -270,6 +304,8 @@ def admin():
             "weekday": WEEKDAYS[date_obj.weekday()],
             "time": row["time"],
             "service": row["service"],
+            "extras": row["extras"],
+            "notes": row["notes"],
             "created_at": row["created_at"],
         })
 

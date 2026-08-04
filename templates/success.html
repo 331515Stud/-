@@ -72,7 +72,13 @@
     <div class="details">
       <div class="row"><span class="label">Дата</span><span class="value">{{ date }}</span></div>
       <div class="row"><span class="label">Время</span><span class="value">{{ time }}</span></div>
-      <div class="row"><span class="label">Тип массажа</span><span class="value">{{ service }}</span></div>
+      <div class="row"><span class="label">Массаж</span><span class="value">{{ service }}</span></div>
+      {% if extras %}
+        <div class="row"><span class="label">Дополнительно</span><span class="value">{{ extras }}</span></div>
+      {% endif %}
+      {% if notes %}
+        <div class="row"><span class="label">Пожелания</span><span class="value">{{ notes }}</span></div>
+      {% endif %}
     </div>
     <a href="/">Записаться снова</a>
   </div>

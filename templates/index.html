@@ -58,6 +58,52 @@
     box-shadow: 0 0 0 3px rgba(212, 126, 171, 0.18);
     background: #fff;
   }
+  textarea {
+    width: 100%;
+    padding: 13px 14px;
+    font-size: 16px;
+    border: 1.5px solid #efd3e0;
+    border-radius: 12px;
+    background: #fdf6f9;
+    color: #4a2b36;
+    outline: none;
+    font-family: inherit;
+    resize: vertical;
+  }
+  textarea:focus {
+    border-color: #d47eab;
+    box-shadow: 0 0 0 3px rgba(212, 126, 171, 0.18);
+    background: #fff;
+  }
+  .extras {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+  .extra {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 12px;
+    font-size: 14px;
+    border: 1.5px solid #efd3e0;
+    border-radius: 10px;
+    background: #fdf6f9;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .extra:hover { border-color: #d47eab; }
+  .extra:has(input:checked) {
+    background: #fbeaf2;
+    border-color: #d47eab;
+    font-weight: 600;
+  }
+  .extra input {
+    width: 18px; height: 18px;
+    accent-color: #d47eab;
+    flex-shrink: 0;
+  }
+  .hint-inline { font-size: 12px; color: #a07a8a; font-weight: 400; text-transform: none; letter-spacing: 0; }
   .slots {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -138,17 +184,27 @@
       </div>
       <input type="hidden" id="time" name="time" class="hidden-time" required>
 
-      <label for="service">Тип массажа</label>
+      <label for="service">Основной массаж</label>
       <select id="service" name="service" required>
-        <option value="" disabled selected>Выберите тип</option>
-        {% for group, services in massage_groups.items() %}
-          <optgroup label="{{ group }}">
-            {% for s in services %}
-              <option value="{{ s }}">{{ s }}</option>
-            {% endfor %}
-          </optgroup>
+        <option value="" disabled selected>Выберите массаж</option>
+        {% for s in main_services %}
+          <option value="{{ s }}">{{ s }}</option>
         {% endfor %}
       </select>
+
+      <label>Дополнительные услуги <span class="hint-inline">(можно несколько)</span></label>
+      <div class="extras">
+        {% for e in extra_services %}
+          <label class="extra">
+            <input type="checkbox" name="extras" value="{{ e }}">
+            <span>{{ e }}</span>
+          </label>
+        {% endfor %}
+      </div>
+
+      <label for="notes">Пожелания / комментарий</label>
+      <textarea id="notes" name="notes" maxlength="500" rows="3"
+        placeholder="Например: давление пожестче, тихая музыка, сюрприз для близкого..."></textarea>
 
       <button type="submit">Записаться</button>
     </form>
