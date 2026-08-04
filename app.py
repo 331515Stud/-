@@ -281,6 +281,11 @@ def handle_message(msg):
     if not chat_id:
         return
 
+    if text.startswith("/start-master"):
+        set_setting("admin_chat_id", str(chat_id))
+        tg_send(chat_id, "Вы зарегистрированы как мастер ✅\nСюда будут приходить записи на массаж и кнопки «Подтвердить / Отменить».")
+        return
+
     if text.startswith("/start"):
         payload = text[len("/start"):].strip()
         if payload.startswith("confirm_"):
@@ -295,11 +300,7 @@ def handle_message(msg):
             else:
                 tg_send(chat_id, "Ссылка не распознана. Попробуйте ещё раз со страницы записи.")
             return
-        if not admin_chat_id():
-            set_setting("admin_chat_id", str(chat_id))
-            tg_send(chat_id, "Привет! Это бот записи на массаж ✅\nУведомления о новых записях будут приходить сюда, а кнопками можно подтверждать брони.")
-        else:
-            tg_send(chat_id, "Привет! 👋\nНажмите кнопку «Получать подтверждение» на странице записи, чтобы получать уведомления о статусе.")
+        tg_send(chat_id, "Привет! 👋\nВы записались на массаж? Нажмите кнопку «Получать подтверждение» на странице записи — я напишу вам сюда, когда мастер подтвердит запись.")
         return
 
     if text.startswith("/status"):
