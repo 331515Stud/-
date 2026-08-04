@@ -2,164 +2,189 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Запись на массаж</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-text-size-adjust: 100%; }
   body {
-    font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
     min-height: 100vh;
-    background: linear-gradient(160deg, #fdf2f6 0%, #fce7f0 50%, #f9d8e6 100%);
+    color: #4a2b36;
+    background:
+      radial-gradient(120% 60% at 100% 0%, #fbe3ee 0%, rgba(251,227,238,0) 55%),
+      radial-gradient(120% 60% at 0% 100%, #e7eefc 0%, rgba(231,238,252,0) 55%),
+      linear-gradient(160deg, #fdf2f6 0%, #fce7f0 55%, #f6e9f7 100%);
     display: flex;
     align-items: flex-start;
     justify-content: center;
-    padding: 24px 16px 40px;
-    color: #4a2b36;
+    padding: calc(20px + env(safe-area-inset-top)) 16px calc(48px + env(safe-area-inset-bottom));
   }
   .card {
-    background: #fff;
     width: 100%;
-    max-width: 440px;
-    border-radius: 20px;
-    box-shadow: 0 12px 40px rgba(214, 120, 165, 0.25);
+    max-width: 460px;
+    background: #fff;
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(181, 90, 137, 0.22);
     overflow: hidden;
   }
   .header {
-    background: linear-gradient(135deg, #e8a0bd, #d47eab);
+    background: linear-gradient(135deg, #efb0c9 0%, #d77cab 55%, #c76ba0 100%);
     color: #fff;
-    padding: 28px 24px;
+    padding: 30px 24px 26px;
     text-align: center;
+    position: relative;
   }
-  .header h1 { font-size: 24px; margin-bottom: 6px; letter-spacing: 0.3px; }
-  .header p { font-size: 14px; opacity: 0.92; }
-  form { padding: 24px; }
-  label {
+  .header .icon {
+    width: 58px; height: 58px;
+    margin: 0 auto 12px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.22);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+  }
+  .header h1 { font-size: 25px; letter-spacing: 0.2px; font-weight: 800; }
+  .header p { font-size: 14.5px; opacity: 0.94; margin-top: 6px; font-weight: 400; }
+  form { padding: 26px 24px 30px; }
+  .field { margin-bottom: 22px; }
+  label.ft {
     display: block;
     font-size: 13px;
-    font-weight: 600;
-    color: #8a5a6e;
-    margin: 18px 0 6px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    font-weight: 700;
+    color: #8a5169;
+    margin-bottom: 8px;
+    letter-spacing: 0.3px;
   }
-  input, select {
+  input[type="text"], input[type="tel"], input[type="date"], select, textarea {
     width: 100%;
-    padding: 13px 14px;
     font-size: 16px;
+    padding: 14px 15px;
     border: 1.5px solid #efd3e0;
-    border-radius: 12px;
+    border-radius: 14px;
     background: #fdf6f9;
     color: #4a2b36;
     outline: none;
-    transition: border-color 0.15s, box-shadow 0.15s;
-  }
-  input:focus, select:focus {
-    border-color: #d47eab;
-    box-shadow: 0 0 0 3px rgba(212, 126, 171, 0.18);
-    background: #fff;
-  }
-  textarea {
-    width: 100%;
-    padding: 13px 14px;
-    font-size: 16px;
-    border: 1.5px solid #efd3e0;
-    border-radius: 12px;
-    background: #fdf6f9;
-    color: #4a2b36;
-    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
     font-family: inherit;
-    resize: vertical;
   }
-  textarea:focus {
-    border-color: #d47eab;
-    box-shadow: 0 0 0 3px rgba(212, 126, 171, 0.18);
+  input:focus, select:focus, textarea:focus {
+    border-color: #d77cab;
+    box-shadow: 0 0 0 4px rgba(215, 124, 171, 0.16);
     background: #fff;
   }
+  textarea { resize: vertical; }
+  .hint { font-size: 12.5px; color: #a77b8d; margin-top: 7px; line-height: 1.4; }
+  .slots {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 9px;
+  }
+  .slot {
+    min-height: 48px;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 600;
+    color: #6b3a50;
+    background: #fdf6f9;
+    border: 1.5px solid #efd3e0;
+    border-radius: 13px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+    touch-action: manipulation;
+  }
+  .slot:active { transform: scale(0.97); }
+  .slot:hover { border-color: #d77cab; }
+  .slot.active {
+    background: linear-gradient(135deg, #e18ab0, #d77cab);
+    border-color: transparent;
+    color: #fff;
+    font-weight: 800;
+    box-shadow: 0 6px 14px rgba(215, 124, 171, 0.35);
+  }
+  .hidden-time { display: none; }
   .extras {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
+    gap: 9px;
   }
   .extra {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 11px 12px;
-    font-size: 14px;
+    gap: 9px;
+    padding: 12px 12px;
+    font-size: 13.5px;
+    line-height: 1.25;
+    color: #6b3a50;
     border: 1.5px solid #efd3e0;
-    border-radius: 10px;
+    border-radius: 12px;
     background: #fdf6f9;
     cursor: pointer;
     transition: all 0.15s;
+    user-select: none;
   }
-  .extra:hover { border-color: #d47eab; }
+  .extra:active { transform: scale(0.98); }
+  .extra:hover { border-color: #d77cab; }
   .extra:has(input:checked) {
     background: #fbeaf2;
-    border-color: #d47eab;
-    font-weight: 600;
+    border-color: #d77cab;
+    color: #a03c6e;
+    font-weight: 700;
   }
   .extra input {
-    width: 18px; height: 18px;
-    accent-color: #d47eab;
+    width: 19px; height: 19px;
+    accent-color: #d77cab;
     flex-shrink: 0;
   }
-  .hint-inline { font-size: 12px; color: #a07a8a; font-weight: 400; text-transform: none; letter-spacing: 0; }
-  .slots {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
+  .hint-inline {
+    font-size: 11.5px;
+    color: #a77b8d;
+    font-weight: 500;
+    text-transform: none;
+    letter-spacing: 0;
   }
-  .slot {
-    text-align: center;
-    padding: 10px 4px;
-    font-size: 15px;
-    border: 1.5px solid #efd3e0;
-    border-radius: 10px;
-    background: #fdf6f9;
-    color: #4a2b36;
-    cursor: pointer;
-    transition: all 0.15s;
-    font-family: inherit;
-  }
-  .slot:hover { border-color: #d47eab; }
-  .slot.active {
-    background: #d47eab;
-    border-color: #d47eab;
-    color: #fff;
-    font-weight: 600;
-  }
-  .hidden-time { display: none; }
-  button[type="submit"] {
+  .btn {
     width: 100%;
-    margin-top: 26px;
-    padding: 15px;
+    min-height: 54px;
     font-size: 17px;
-    font-weight: 700;
+    font-weight: 800;
     color: #fff;
-    background: linear-gradient(135deg, #e8a0bd, #d47eab);
+    background: linear-gradient(135deg, #e18ab0, #c76ba0);
     border: none;
-    border-radius: 14px;
+    border-radius: 16px;
     cursor: pointer;
-    transition: transform 0.1s, box-shadow 0.15s;
-    box-shadow: 0 6px 18px rgba(212, 126, 171, 0.35);
+    box-shadow: 0 10px 24px rgba(199, 107, 160, 0.4);
+    transition: transform 0.12s, box-shadow 0.15s;
+    touch-action: manipulation;
   }
-  button[type="submit"]:hover { transform: translateY(-1px); }
-  button[type="submit"]:active { transform: translateY(0); }
+  .btn:active { transform: translateY(1px) scale(0.99); box-shadow: 0 6px 14px rgba(199, 107, 160, 0.3); }
   .flash {
-    margin: 0 24px;
+    margin: 16px 20px 0;
     padding: 12px 14px;
-    border-radius: 10px;
+    border-radius: 12px;
     font-size: 14px;
+    line-height: 1.4;
   }
-  .flash.error { background: #fde8ec; color: #b03a50; }
-  .hint { font-size: 13px; color: #a07a8a; margin-top: 6px; }
+  .flash.error { background: #fde4ea; color: #b03a50; border: 1px solid #f6c4d0; }
+  .flash.ok { background: #e5f5ea; color: #2f7a45; border: 1px solid #c4e5cf; }
+
+  @media (max-width: 380px) {
+    body { padding-left: 12px; padding-right: 12px; }
+    form { padding-left: 18px; padding-right: 18px; }
+    .extras { grid-template-columns: 1fr; }
+    .slots { grid-template-columns: repeat(3, 1fr); gap: 7px; }
+    .slot { min-height: 46px; font-size: 14px; }
+    .header h1 { font-size: 22px; }
+  }
 </style>
 </head>
 <body>
   <div class="card">
     <div class="header">
+      <div class="icon">💆‍♀️</div>
       <h1>Запись на массаж</h1>
-      <p>Выберите удобное время — мы вас ждём 💆‍♀️</p>
+      <p>Выберите удобное время — мы вас ждём</p>
     </div>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -169,54 +194,79 @@
     {% endwith %}
 
     <form method="POST" action="/book">
-      <label for="name">Ваше имя</label>
-      <input type="text" id="name" name="name" maxlength="100" placeholder="Например, Анна" required>
-
-      <label for="phone">Ваш телефон</label>
-      <input type="tel" id="phone" name="phone" maxlength="20" placeholder="+7 900 000-00-00" required>
-      <div class="hint">По нему мастер подтвердит запись, подтверждение придёт в Telegram</div>
-
-      <label for="date">Дата</label>
-      <input type="date" id="date" name="date" min="{{ today }}" required>
-      <div class="hint">Запись возможна с завтрашнего дня или позже</div>
-
-      <label>Время</label>
-      <div class="slots">
-        {% for slot in time_slots %}
-          <button type="button" class="slot" data-time="{{ slot }}">{{ slot }}</button>
-        {% endfor %}
-      </div>
-      <input type="hidden" id="time" name="time" class="hidden-time" required>
-
-      <label for="service">Основной массаж</label>
-      <select id="service" name="service" required>
-        <option value="" disabled selected>Выберите массаж</option>
-        {% for s in main_services %}
-          <option value="{{ s }}">{{ s }}</option>
-        {% endfor %}
-      </select>
-
-      <label>Дополнительные услуги <span class="hint-inline">(можно несколько)</span></label>
-      <div class="extras">
-        {% for e in extra_services %}
-          <label class="extra">
-            <input type="checkbox" name="extras" value="{{ e }}">
-            <span>{{ e }}</span>
-          </label>
-        {% endfor %}
+      <div class="field">
+        <label class="ft" for="name">Ваше имя</label>
+        <input type="text" id="name" name="name" maxlength="100" placeholder="Например, Анна" required>
       </div>
 
-      <div id="playlistWrap" style="display:none;">
-        <label for="playlist">Ваши треки или ссылки</label>
+      <div class="field">
+        <label class="ft" for="phone">Ваш телефон</label>
+        <input type="tel" id="phone" name="phone" maxlength="20" placeholder="+7 900 000-00-00" required>
+        <div class="hint">По нему мастер подтвердит запись, подтверждение придёт в Telegram</div>
+      </div>
+
+      <div class="field">
+        <label class="ft" for="date">Дата</label>
+        <input type="date" id="date" name="date" min="{{ today }}" required>
+        <div class="hint">Запись возможна с завтрашнего дня или позже</div>
+      </div>
+
+      <div class="field">
+        <label class="ft">Время</label>
+        <div class="slots">
+          {% for slot in time_slots %}
+            <button type="button" class="slot" data-time="{{ slot }}">{{ slot }}</button>
+          {% endfor %}
+        </div>
+        <input type="hidden" id="time" name="time" class="hidden-time" required>
+      </div>
+
+      <div class="field">
+        <label class="ft" for="service">Основной массаж</label>
+        <select id="service" name="service" required>
+          <option value="" disabled selected>Выберите массаж</option>
+          {% for s in main_services %}
+            <option value="{{ s }}">{{ s }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="field">
+        <label class="ft" for="master">Мастер</label>
+        <select id="master" name="master" required>
+          <option value="" disabled selected>Выберите мастера</option>
+          {% for m in masters %}
+            <option value="{{ m }}">{{ m }}</option>
+          {% endfor %}
+        </select>
+        <div class="hint">{{ master_info.get(masters[0], '') }}</div>
+      </div>
+
+      <div class="field">
+        <label class="ft">Дополнительные услуги <span class="hint-inline">— можно несколько</span></label>
+        <div class="extras">
+          {% for e in extra_services %}
+            <label class="extra">
+              <input type="checkbox" name="extras" value="{{ e }}">
+              <span>{{ e }}</span>
+            </label>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="field" id="playlistWrap" style="display:none;">
+        <label class="ft" for="playlist">Ваши треки или ссылки</label>
         <textarea id="playlist" name="playlist" maxlength="1000" rows="3"
           placeholder="Названия треков или ссылки на музыку (Яндекс Музыка, Spotify...)" disabled></textarea>
       </div>
 
-      <label for="notes">Пожелания / комментарий</label>
-      <textarea id="notes" name="notes" maxlength="500" rows="3"
-        placeholder="Например: давление пожестче, тихая музыка, сюрприз для близкого..."></textarea>
+      <div class="field">
+        <label class="ft" for="notes">Пожелания / комментарий</label>
+        <textarea id="notes" name="notes" maxlength="500" rows="3"
+          placeholder="Например: давление пожестче, тихая музыка, сюрприз для близкого..."></textarea>
+      </div>
 
-      <button type="submit">Записаться</button>
+      <button class="btn" type="submit">Записаться</button>
     </form>
   </div>
 

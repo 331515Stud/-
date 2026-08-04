@@ -2,85 +2,99 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Вы записаны!</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
     min-height: 100vh;
-    background: linear-gradient(160deg, #fdf2f6 0%, #fce7f0 50%, #f9d8e6 100%);
+    color: #4a2b36;
+    background:
+      radial-gradient(120% 60% at 100% 0%, #fbe3ee 0%, rgba(251,227,238,0) 55%),
+      radial-gradient(120% 60% at 0% 100%, #e7eefc 0%, rgba(231,238,252,0) 55%),
+      linear-gradient(160deg, #fdf2f6 0%, #fce7f0 55%, #f6e9f7 100%);
     display: flex;
     align-items: flex-start;
     justify-content: center;
-    padding: 40px 16px;
-    color: #4a2b36;
+    padding: calc(24px + env(safe-area-inset-top)) 16px calc(48px + env(safe-area-inset-bottom));
   }
   .card {
-    background: #fff;
     width: 100%;
-    max-width: 440px;
-    border-radius: 20px;
-    box-shadow: 0 12px 40px rgba(214, 120, 165, 0.25);
-    padding: 32px 24px;
+    max-width: 460px;
+    background: #fff;
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(181, 90, 137, 0.22);
+    padding: 34px 24px 30px;
     text-align: center;
   }
   .check {
-    width: 72px; height: 72px;
+    width: 78px; height: 78px;
     margin: 0 auto 18px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #9ed6a8, #6cbf7e);
+    background: linear-gradient(135deg, #a5dcae, #63b877);
     display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 10px 24px rgba(99, 184, 119, 0.4);
   }
-  .check svg { width: 36px; height: 36px; }
-  h1 { font-size: 24px; margin-bottom: 8px; }
-  .sub { color: #8a5a6e; margin-bottom: 24px; font-size: 15px; }
+  .check svg { width: 38px; height: 38px; }
+  h1 { font-size: 26px; margin-bottom: 8px; font-weight: 800; }
+  .sub { color: #8a5a6e; margin-bottom: 26px; font-size: 15px; }
   .details {
     text-align: left;
     background: #fdf6f9;
     border: 1.5px solid #efd3e0;
-    border-radius: 14px;
-    padding: 18px;
+    border-radius: 16px;
+    padding: 8px 18px;
     margin-bottom: 24px;
   }
-  .details .row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 15px; }
-  .details .label { color: #a07a8a; }
-  .details .value { font-weight: 700; text-align: right; }
+  .details .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 0;
+    font-size: 15px;
+    border-bottom: 1px solid #f3dde8;
+  }
+  .details .row:last-child { border-bottom: none; }
+  .details .label { color: #a07a8a; flex-shrink: 0; }
+  .details .value { font-weight: 700; text-align: right; word-break: break-word; }
   .tg {
     text-align: center;
     background: #eef5fb;
     border: 1.5px solid #cfe3f5;
-    border-radius: 14px;
-    padding: 18px 16px;
+    border-radius: 16px;
+    padding: 20px 16px;
     margin-bottom: 24px;
   }
   .tg-button {
     display: inline-block;
-    padding: 12px 20px;
-    font-size: 15px;
-    font-weight: 700;
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: 800;
     color: #fff;
     background: linear-gradient(135deg, #5aa8e6, #3d8fd6);
-    border-radius: 12px;
+    border-radius: 14px;
     text-decoration: none;
-    box-shadow: 0 4px 14px rgba(61, 143, 214, 0.35);
-    transition: transform 0.1s, box-shadow 0.15s;
+    box-shadow: 0 8px 20px rgba(61, 143, 214, 0.35);
+    transition: transform 0.12s, box-shadow 0.15s;
     margin-bottom: 10px;
   }
-  .tg-button:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(61, 143, 214, 0.4); }
-  .tg-sub { font-size: 13px; color: #5a7287; }
-  a {
+  .tg-button:active { transform: translateY(1px); box-shadow: 0 4px 10px rgba(61, 143, 214, 0.3); }
+  .tg-sub { font-size: 13px; color: #5a7287; line-height: 1.45; }
+  .again {
     display: inline-block;
-    padding: 12px 24px;
+    padding: 13px 26px;
     font-size: 15px;
-    font-weight: 600;
-    color: #d47eab;
+    font-weight: 700;
+    color: #c76ba0;
     text-decoration: none;
-    border: 1.5px solid #d47eab;
-    border-radius: 12px;
+    border: 1.5px solid #d77cab;
+    border-radius: 14px;
     transition: all 0.15s;
   }
-  a:hover { background: #d47eab; color: #fff; }
+  .again:active { background: #fbeaf2; }
 </style>
 </head>
 <body>
@@ -91,8 +105,9 @@
       </svg>
     </div>
     <h1>Вы записаны!</h1>
-    <div class="sub">Спасибо, {{ name }}! Мы ждём вас. 💆‍♀️</div>
+    <div class="sub">Спасибо, {{ name }}! Мы ждём вас 💕</div>
     <div class="details">
+      <div class="row"><span class="label">Мастер</span><span class="value">{{ master }}</span></div>
       <div class="row"><span class="label">Дата</span><span class="value">{{ date }}</span></div>
       <div class="row"><span class="label">Время</span><span class="value">{{ time }}</span></div>
       <div class="row"><span class="label">Массаж</span><span class="value">{{ service }}</span></div>
@@ -110,7 +125,7 @@
       <a class="tg-button" href="https://t.me/{{ bot_username }}?start=confirm_{{ booking_id }}" target="_blank">🔔 Получать подтверждение</a>
       <div class="tg-sub">Нажмите → запустите бота. Подтверждение мастера придёт сюда.</div>
     </div>
-    <a href="/">Записаться снова</a>
+    <a class="again" href="/">Записаться снова</a>
   </div>
 </body>
 </html>
