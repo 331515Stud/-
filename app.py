@@ -206,6 +206,19 @@ def tg_send(chat_id, text, reply_markup=None):
     return tg_api("sendMessage", payload)
 
 
+_BOT_USERNAME = None
+
+
+def bot_username():
+    global _BOT_USERNAME
+    if _BOT_USERNAME:
+        return _BOT_USERNAME
+    data = tg_api("getMe", {})
+    if data and data.get("ok"):
+        _BOT_USERNAME = data.get("result", {}).get("username", "")
+    return _BOT_USERNAME
+
+
 def notify_booking(booking_id):
     row = get_booking(booking_id)
     chat_id = admin_chat_id()
@@ -268,12 +281,25 @@ def handle_message(msg):
     if not chat_id:
         return
 
-    if text == "/start":
+    if text.startswith("/start"):
+        payload = text[len("/start"):].strip()
+        if payload.startswith("confirm_"):
+            bid = payload[len("confirm_"):]
+            if bid.isdigit():
+                with get_db() as conn:
+                    conn.execute(
+                        "UPDATE bookings SET tgm_chat_id = ? WHERE id = ?",
+                        (chat_id, int(bid)),
+                    )
+                tg_send(chat_id, "Отлично! 💌 Когда мастер подтвердит вашу запись, я напишу вам сюда.")
+            else:
+                tg_send(chat_id, "Ссылка не распознана. Попробуйте ещё раз со страницы записи.")
+            return
         if not admin_chat_id():
             set_setting("admin_chat_id", str(chat_id))
             tg_send(chat_id, "Привет! Это бот записи на массаж ✅\nУведомления о новых записях будут приходить сюда, а кнопками можно подтверждать брони.")
         else:
-            tg_send(chat_id, "Привет! 👋\nЕсли вы записывались на сайте — пришлите свой номер телефона, чтобы получать подтверждение записи здесь.")
+            tg_send(chat_id, "Привет! 👋\nНажмите кнопку «Получать подтверждение» на странице записи, чтобы получать уведомления о статусе.")
         return
 
     if text.startswith("/status"):
@@ -445,13 +471,14 @@ def book():
 
     notify_booking(booking_id)
     return redirect(
-        url_for("success", name=name, phone=phone, date=date_str, time=time_str,
-                service=service, extras=extras_csv, playlist=playlist, notes=notes)
+        url_for("success", booking_id=booking_id, name=name, phone=phone, date=date_str,
+                time=time_str, service=service, extras=extras_csv, playlist=playlist, notes=notes)
     )
 
 
 @app.route("/success")
 def success():
+    booking_id = request.args.get("booking_id", "")
     name = request.args.get("name", "")
     phone = request.args.get("phone", "")
     date_str = request.args.get("date", "")
@@ -466,6 +493,8 @@ def success():
         pretty = ""
     return render_template(
         "success.html",
+        booking_id=booking_id,
+        bot_username=bot_username(),
         name=name, phone=phone, date=pretty, time=time_str,
         service=service, extras=extras, playlist=playlist, notes=notes,
     )
