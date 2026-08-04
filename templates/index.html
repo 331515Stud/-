@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Запись на массаж</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    min-height: 100vh;
+    background: linear-gradient(160deg, #fdf2f6 0%, #fce7f0 50%, #f9d8e6 100%);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 24px 16px 40px;
+    color: #4a2b36;
+  }
+  .card {
+    background: #fff;
+    width: 100%;
+    max-width: 440px;
+    border-radius: 20px;
+    box-shadow: 0 12px 40px rgba(214, 120, 165, 0.25);
+    overflow: hidden;
+  }
+  .header {
+    background: linear-gradient(135deg, #e8a0bd, #d47eab);
+    color: #fff;
+    padding: 28px 24px;
+    text-align: center;
+  }
+  .header h1 { font-size: 24px; margin-bottom: 6px; letter-spacing: 0.3px; }
+  .header p { font-size: 14px; opacity: 0.92; }
+  form { padding: 24px; }
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #8a5a6e;
+    margin: 18px 0 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  input, select {
+    width: 100%;
+    padding: 13px 14px;
+    font-size: 16px;
+    border: 1.5px solid #efd3e0;
+    border-radius: 12px;
+    background: #fdf6f9;
+    color: #4a2b36;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  input:focus, select:focus {
+    border-color: #d47eab;
+    box-shadow: 0 0 0 3px rgba(212, 126, 171, 0.18);
+    background: #fff;
+  }
+  .slots {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .slot {
+    text-align: center;
+    padding: 10px 4px;
+    font-size: 15px;
+    border: 1.5px solid #efd3e0;
+    border-radius: 10px;
+    background: #fdf6f9;
+    color: #4a2b36;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+  .slot:hover { border-color: #d47eab; }
+  .slot.active {
+    background: #d47eab;
+    border-color: #d47eab;
+    color: #fff;
+    font-weight: 600;
+  }
+  .hidden-time { display: none; }
+  button[type="submit"] {
+    width: 100%;
+    margin-top: 26px;
+    padding: 15px;
+    font-size: 17px;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(135deg, #e8a0bd, #d47eab);
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.15s;
+    box-shadow: 0 6px 18px rgba(212, 126, 171, 0.35);
+  }
+  button[type="submit"]:hover { transform: translateY(-1px); }
+  button[type="submit"]:active { transform: translateY(0); }
+  .flash {
+    margin: 0 24px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-size: 14px;
+  }
+  .flash.error { background: #fde8ec; color: #b03a50; }
+  .hint { font-size: 13px; color: #a07a8a; margin-top: 6px; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <h1>Запись на массаж</h1>
+      <p>Выберите удобное время — мы вас ждём 💆‍♀️</p>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    <form method="POST" action="/book">
+      <label for="name">Ваше имя</label>
+      <input type="text" id="name" name="name" maxlength="100" placeholder="Например, Анна" required>
+
+      <label for="date">Дата</label>
+      <input type="date" id="date" name="date" min="{{ today }}" required>
+      <div class="hint">Запись возможна с завтрашнего дня или позже</div>
+
+      <label>Время</label>
+      <div class="slots">
+        {% for slot in time_slots %}
+          <button type="button" class="slot" data-time="{{ slot }}">{{ slot }}</button>
+        {% endfor %}
+      </div>
+      <input type="hidden" id="time" name="time" class="hidden-time" required>
+
+      <label for="service">Тип массажа</label>
+      <select id="service" name="service" required>
+        <option value="" disabled selected>Выберите тип</option>
+        {% for t in massage_types %}
+          <option value="{{ t }}">{{ t }}</option>
+        {% endfor %}
+      </select>
+
+      <button type="submit">Записаться</button>
+    </form>
+  </div>
+
+<script>
+  var hidden = document.getElementById("time");
+  var slots = document.querySelectorAll(".slot");
+  slots.forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      slots.forEach(function (b) { b.classList.remove("active"); });
+      btn.classList.add("active");
+      hidden.value = btn.dataset.time;
+    });
+  });
+
+  var dateInput = document.getElementById("date");
+  var tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  var iso = tomorrow.toISOString().split("T")[0];
+  dateInput.min = iso;
+  dateInput.value = iso;
+</script>
+</body>
+</html>

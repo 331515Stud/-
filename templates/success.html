@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Вы записаны!</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    min-height: 100vh;
+    background: linear-gradient(160deg, #fdf2f6 0%, #fce7f0 50%, #f9d8e6 100%);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 40px 16px;
+    color: #4a2b36;
+  }
+  .card {
+    background: #fff;
+    width: 100%;
+    max-width: 440px;
+    border-radius: 20px;
+    box-shadow: 0 12px 40px rgba(214, 120, 165, 0.25);
+    padding: 32px 24px;
+    text-align: center;
+  }
+  .check {
+    width: 72px; height: 72px;
+    margin: 0 auto 18px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #9ed6a8, #6cbf7e);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .check svg { width: 36px; height: 36px; }
+  h1 { font-size: 24px; margin-bottom: 8px; }
+  .sub { color: #8a5a6e; margin-bottom: 24px; font-size: 15px; }
+  .details {
+    text-align: left;
+    background: #fdf6f9;
+    border: 1.5px solid #efd3e0;
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 24px;
+  }
+  .details .row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 15px; }
+  .details .label { color: #a07a8a; }
+  .details .value { font-weight: 700; text-align: right; }
+  a {
+    display: inline-block;
+    padding: 12px 24px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #d47eab;
+    text-decoration: none;
+    border: 1.5px solid #d47eab;
+    border-radius: 12px;
+    transition: all 0.15s;
+  }
+  a:hover { background: #d47eab; color: #fff; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="check">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+    </div>
+    <h1>Вы записаны!</h1>
+    <div class="sub">Спасибо, {{ name }}! Мы ждём вас. 💆‍♀️</div>
+    <div class="details">
+      <div class="row"><span class="label">Дата</span><span class="value">{{ date }}</span></div>
+      <div class="row"><span class="label">Время</span><span class="value">{{ time }}</span></div>
+      <div class="row"><span class="label">Тип массажа</span><span class="value">{{ service }}</span></div>
+    </div>
+    <a href="/">Записаться снова</a>
+  </div>
+</body>
+</html>

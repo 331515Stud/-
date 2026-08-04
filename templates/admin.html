@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Записи на массаж</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    min-height: 100vh;
+    background: #faf6f8;
+    color: #4a2b36;
+    padding: 24px 16px 60px;
+  }
+  .wrap { max-width: 900px; margin: 0 auto; }
+  h1 { font-size: 22px; margin-bottom: 4px; }
+  .sub { color: #a07a8a; font-size: 14px; margin-bottom: 20px; }
+  .toolbar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+  .toolbar input[type="date"], .toolbar a {
+    padding: 9px 12px; font-size: 14px; border: 1.5px solid #efd3e0;
+    border-radius: 10px; background: #fff; color: #4a2b36; text-decoration: none;
+  }
+  .toolbar button {
+    padding: 9px 16px; font-size: 14px; font-weight: 600; color: #fff;
+    background: linear-gradient(135deg, #e8a0bd, #d47eab);
+    border: none; border-radius: 10px; cursor: pointer;
+  }
+  .flash { padding: 10px 12px; border-radius: 10px; font-size: 14px; margin-bottom: 16px; }
+  .flash.ok { background: #e6f6e9; color: #2f7a45; }
+  table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 14px; overflow: hidden; box-shadow: 0 6px 24px rgba(214,120,165,.15); }
+  th, td { padding: 12px 14px; text-align: left; font-size: 14px; border-bottom: 1px solid #f3e4ec; }
+  th { background: #fdf2f6; font-size: 12px; text-transform: uppercase; letter-spacing: .5px; color: #8a5a6e; }
+  tr:last-child td { border-bottom: none; }
+  .badge { display: inline-block; background: #fdf2f6; color: #c96a95; border-radius: 8px; padding: 3px 10px; font-size: 13px; }
+  .del {
+    color: #b03a50; background: none; border: none; cursor: pointer; font-size: 13px; text-decoration: underline;
+  }
+  .empty { background: #fff; border-radius: 14px; padding: 40px; text-align: center; color: #a07a8a; box-shadow: 0 6px 24px rgba(214,120,165,.15); }
+  .count { font-size: 14px; color: #8a5a6e; margin-bottom: 12px; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>📋 Записи на массаж</h1>
+    <div class="sub">Все бронирования, которые прошли через форму.</div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    <form class="toolbar" method="GET" action="/admin">
+      <input type="date" name="date" value="{{ filter_date }}">
+      <button type="submit">Фильтр по дате</button>
+      {% if filter_date %}<a href="/admin">Сбросить</a>{% endif %}
+    </form>
+
+    {% if bookings %}
+      <div class="count">Найдено: {{ bookings|length }}</div>
+      <table>
+        <tr><th>Имя</th><th>Дата</th><th>Время</th><th>Тип</th><th></th></tr>
+        {% for b in bookings %}
+          <tr>
+            <td><b>{{ b.name }}</b></td>
+            <td>{{ b.date }} <span class="badge">{{ b.weekday }}</span></td>
+            <td>{{ b.time }}</td>
+            <td>{{ b.service }}</td>
+            <td>
+              <form method="POST" action="/admin/delete/{{ b.id }}" onsubmit="return confirm('Удалить запись?');">
+                <button class="del" type="submit">удалить</button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+      </table>
+    {% else %}
+      <div class="empty">Записей пока нет 🙌</div>
+    {% endif %}
+  </div>
+</body>
+</html>
