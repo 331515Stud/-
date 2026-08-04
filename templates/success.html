@@ -46,6 +46,27 @@
   .details .row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 15px; }
   .details .label { color: #a07a8a; }
   .details .value { font-weight: 700; text-align: right; }
+  .tg {
+    text-align: left;
+    background: #eef5fb;
+    border: 1.5px solid #cfe3f5;
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 24px;
+  }
+  .tg-title { font-weight: 700; font-size: 15px; margin-bottom: 8px; }
+  .tg-text { font-size: 14px; color: #4a5b6b; margin: 8px 0; }
+  .tg-cmd {
+    display: inline-block;
+    background: #fff;
+    border: 1.5px dashed #7fa8c9;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-family: "Consolas", monospace;
+    font-size: 14px;
+    color: #2d6da3;
+    word-break: break-all;
+  }
   a {
     display: inline-block;
     padding: 12px 24px;
@@ -76,9 +97,18 @@
       {% if extras %}
         <div class="row"><span class="label">Дополнительно</span><span class="value">{{ extras }}</span></div>
       {% endif %}
+      {% if playlist %}
+        <div class="row"><span class="label">Плейлист</span><span class="value">{{ playlist }}</span></div>
+      {% endif %}
       {% if notes %}
         <div class="row"><span class="label">Пожелания</span><span class="value">{{ notes }}</span></div>
       {% endif %}
+    </div>
+    <div class="tg">
+      <div class="tg-title">💌 Получайте подтверждение в Telegram</div>
+      <div class="tg-text">Откройте бота <b>@massage_katyusha_bot</b> и пришлите ему свой номер:</div>
+      <div class="tg-cmd">/confirm {{ phone }}</div>
+      <div class="tg-text">Как только мастер подтвердит запись, вам придёт уведомление прямо сюда.</div>
     </div>
     <a href="/">Записаться снова</a>
   </div>

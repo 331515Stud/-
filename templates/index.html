@@ -172,6 +172,10 @@
       <label for="name">Ваше имя</label>
       <input type="text" id="name" name="name" maxlength="100" placeholder="Например, Анна" required>
 
+      <label for="phone">Ваш телефон</label>
+      <input type="tel" id="phone" name="phone" maxlength="20" placeholder="+7 900 000-00-00" required>
+      <div class="hint">По нему мастер подтвердит запись, подтверждение придёт в Telegram</div>
+
       <label for="date">Дата</label>
       <input type="date" id="date" name="date" min="{{ today }}" required>
       <div class="hint">Запись возможна с завтрашнего дня или позже</div>
@@ -202,6 +206,12 @@
         {% endfor %}
       </div>
 
+      <div id="playlistWrap" style="display:none;">
+        <label for="playlist">Ваши треки или ссылки</label>
+        <textarea id="playlist" name="playlist" maxlength="1000" rows="3"
+          placeholder="Названия треков или ссылки на музыку (Яндекс Музыка, Spotify...)" disabled></textarea>
+      </div>
+
       <label for="notes">Пожелания / комментарий</label>
       <textarea id="notes" name="notes" maxlength="500" rows="3"
         placeholder="Например: давление пожестче, тихая музыка, сюрприз для близкого..."></textarea>
@@ -218,6 +228,19 @@
       slots.forEach(function (b) { b.classList.remove("active"); });
       btn.classList.add("active");
       hidden.value = btn.dataset.time;
+    });
+  });
+
+  var plExtra = {{ playlist_extra|tojson }};
+  document.querySelectorAll('.extra input').forEach(function (cb) {
+    if (cb.value !== plExtra) return;
+    cb.addEventListener("change", function () {
+      var on = cb.checked;
+      var wrap = document.getElementById("playlistWrap");
+      var field = document.getElementById("playlist");
+      wrap.style.display = on ? "block" : "none";
+      field.disabled = !on;
+      if (!on) field.value = "";
     });
   });
 
